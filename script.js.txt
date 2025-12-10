@@ -1,0 +1,73 @@
+const SHEET_ID = "1dXJ1MxEJQS_ngEdfNEA_2GuV-18Ce5lopR3cRsgD1q8";
+const SHEET_NAME = "GUIAS DE CONVENIO";
+
+// URL que retorna JSON do Google Sheets
+const URL_JSON = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(SHEET_NAME)}`;
+
+let dados = [];
+
+async function carregarDados() {
+    const res = await fetch(URL_JSON);
+    const text = await res.text();
+    const json = JSON.parse(text.substring(47).slice(0, -2));
+
+    dados = json.table.rows.map(r => r.c.map(c => (c ? c.v : "")));
+    const cabecalho = json.table.cols.map(c => c.label);
+
+    // Transformar em objetos
+    dados = dados.map(row => {
+        let obj = {};
+        row.forEach((cell, i) => obj[cabecalho[i]] = cell);
+        return obj;
+    });
+
+    renderLista();
+}
+
+function renderLista(filtro = "") {
+    const lista = document.getElementById("lista");
+    lista.innerHTML = "";
+
+    dados
+        .filter(d => d["CONVENIO"].toLowerCase().includes(filtro.toLowerCase()))
+        .forEach(d => {
+
+            const card = document.createElement("div");
+            card.classList.add("card");
+
+            card.innerHTML = `
+                <h2>${d["CONVENIO"]}</h2>
+                <p><strong>Fonte Pagadora:</strong> ${d["FONTE PAGADORA"]}</p>
+                <p><strong>Validade PM:</strong> ${d["VALIDADE DO P.M"]}</p>
+                <p><strong>Autorização:</strong> ${d["AUTORIZAÇÃO"]}</p>
+            `;
+
+            card.onclick = () => abrirDetalhe(d);
+            lista.appendChild(card);
+        });
+}
+
+function abrirDetalhe(conv) {
+    document.getElementById("lista").style.display = "none";
+    document.getElementById("detalhe").style.display = "block";
+
+    document.getElementById("titulo").innerText = conv["CONVENIO"];
+
+    let html = "";
+    for (let campo in conv) {
+        html += `<p><strong>${campo}:</strong> ${conv[campo]}</p>`;
+    }
+
+    document.getElementById("conteudo").innerHTML = html;
+}
+
+document.getElementById("voltar").onclick = () => {
+    document.getElementById("detalhe").style.display = "none";
+    document.getElementById("lista").style.display = "flex";
+};
+
+document.getElementById("search").addEventListener("input", e => {
+    renderLista(e.target.value);
+});
+
+carregarDados();

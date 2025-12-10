@@ -1,0 +1,25 @@
+!DOCTYPE html
+html lang=pt-BR
+head
+    meta charset=UTF-8
+    titleGuia de Convêniostitle
+    link rel=stylesheet href=style.css
+head
+body
+
+header
+    h1Guia de Convêniosh1
+    input id=search type=text placeholder=Pesquisar convênio...
+header
+
+div id=lista class=containerdiv
+
+div id=detalhe class=detalhe-card style=displaynone;
+    button id=voltar← Voltarbutton
+    h2 id=tituloh2
+    div id=conteudodiv
+div
+
+script src=script.jsscript
+body
+html
